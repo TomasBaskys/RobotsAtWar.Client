@@ -16,10 +16,10 @@ namespace ClientSideApplication
 
             for (int i = 0; i < actions.Length; i++)
             {
-                var action = (WarriorBrain.Actions) Enum.Parse(typeof (WarriorBrain.Actions), actions[i]);
+                var action = (WarriorBrain.Actions)Enum.Parse(typeof(WarriorBrain.Actions), actions[i]);
                 if (action == WarriorBrain.Actions.Attack)
                 {
-                    var strength = (WarriorBrain.Strength) Enum.Parse(typeof (WarriorBrain.Strength), actionLevel[i]);
+                    var strength = (WarriorBrain.Strength)Enum.Parse(typeof(WarriorBrain.Strength), actionLevel[i]);
                     myStrategy.Add(new Commands(action, strength));
                 }
                 else
