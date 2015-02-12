@@ -24,12 +24,19 @@ namespace ClientSideApplication
             request.AddUrlSegment("RoomGUID", WarriorBrain.RoomGuid);
             request.AddUrlSegment("MyGUID", ConfigSettings.ReadSetting("MyGUID"));
             request.AddUrlSegment("strength", info);
+            try
+            {
+                IRestResponse response = client.Execute(request);
 
-            IRestResponse response = client.Execute(request);
+                var content = response.Content;
 
-            var content = response.Content;
-
-            return content;
+                return content;
+            }
+            catch (Exception)
+            {
+                Logger.Info("Unable to connect to server!");
+            }
+            return "0";
         }
 
         public string HostGame()
@@ -91,6 +98,7 @@ namespace ClientSideApplication
         public void Attack(WarriorBrain.Strength strength)
         {
             Logger.Info("You are trying to deal " + strength + " atack!");
+            int a;
             int damage = Int32.Parse(DoAction("attack", strength, 0));
 
             switch (damage)
