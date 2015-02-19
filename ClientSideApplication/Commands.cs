@@ -1,21 +1,46 @@
+using ClientSideApplication.Enums;
+
 namespace ClientSideApplication
 {
-    public class Commands
+    public class Command
     {
-        public readonly WarriorBrain.Actions Action;
-        public readonly int Time;
-        public readonly WarriorBrain.Strength Strength;
+        public ActionName Action;
+        public int Time;
+        public Strength Strength;
 
-        public Commands(WarriorBrain.Actions action, int time)
+
+        //For def and rest only
+        public Command(ActionName action, int time)
         {
+            switch (action)
+            {
+                case ActionName.Attack:
+                    return;
+                case ActionName.Check:
+                    return;
+            }
             Action = action;
             Time = time;
         }
 
-        public Commands(WarriorBrain.Actions action, WarriorBrain.Strength strength)
+        //For attack only
+        public Command(ActionName action, Strength str)
         {
+            if (action != ActionName.Attack)
+            {
+                return;
+            }
             Action = action;
-            Strength = strength;
+            Strength = str;
+        }
+        //For check only
+        public Command(ActionName action)
+        {
+            if (action != ActionName.Check)
+            {
+                return;
+            }
+            this.Action = action;
         }
     }
 }

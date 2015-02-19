@@ -14,13 +14,13 @@ namespace ClientSideApplication
     {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(WarriorClient));
 
-        private Response DoAction(string action, WarriorBrain.Strength strength, int time)
+        private Response DoAction(string action, Strength strength, int time)
         {
             var client = new RestClient(ConfigSettings.ReadSetting("Url"));
             var request = new RestRequest(action + "/{RoomGUID}/{MyGUID}/{strength}", Method.POST);
 
             string info;
-            if (strength.Equals(WarriorBrain.Strength.None)) info = time.ToString();
+            if (strength.Equals(Strength.None)) info = time.ToString();
             else info = strength.ToString();
 
             request.AddUrlSegment("RoomGUID", WarriorBrain.RoomGuid);
@@ -116,7 +116,7 @@ namespace ClientSideApplication
             }
         }
 
-        public Response Attack(WarriorBrain.Strength strength)
+        public Response Attack(Strength strength)
         {
             Logger.Info("You are trying to deal " + strength + " atack!");
             Response attackResponse = DoAction("attack", strength, 0);
@@ -180,7 +180,7 @@ namespace ClientSideApplication
         {
             Logger.Info("You are defending for " + time + "s.");
 
-            Response response = DoAction("defend", WarriorBrain.Strength.None, time);
+            Response response = DoAction("defend", Strength.None, time);
 
             switch (response)
             {
@@ -198,7 +198,7 @@ namespace ClientSideApplication
         {
             Logger.Info("You are resting for " + time + "s");
 
-            Response response = DoAction("rest", WarriorBrain.Strength.None, time);
+            Response response = DoAction("rest", Strength.None, time);
 
             switch (response)
             {

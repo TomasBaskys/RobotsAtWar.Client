@@ -9,18 +9,14 @@ namespace ClientSideApplication
 {
     public class WarriorBrain
     {
-        public enum Actions { Attack, Defend, Rest, Check }
-        public enum Strength { Weak, Medium, Strong, None }
-
-
         private bool _bothUsersOnline = false;
         private readonly WarriorClient _warriorClient;
         private int _currentActionNumber;
-        private readonly List<Commands> _strategy;
+        private readonly List<Command> _strategy;
         public static string RoomGuid;
         private bool _ihaveLost;
         public static WarriorState MyInfo = new WarriorState() { Life = 10, State = States.DoingNothing };
-        public WarriorBrain(List<Commands> strategy)
+        public WarriorBrain(List<Command> strategy)
         {
             _warriorClient = new WarriorClient();
             _strategy = strategy;
@@ -91,20 +87,20 @@ namespace ClientSideApplication
             _currentActionNumber++;
         }
 
-        private void ExecuteCommand(Commands command)
+        private void ExecuteCommand(Command command)
         {
             switch (command.Action)
             {
-                case Actions.Attack:
+                case ActionName.Attack:
                     _warriorClient.Attack(command.Strength);
                     break;
-                case Actions.Defend:
+                case ActionName.Defend:
                     _warriorClient.Defend(command.Time);
                     break;
-                case Actions.Rest:
+                case ActionName.Rest:
                     _warriorClient.Rest(command.Time);
                     break;
-                case Actions.Check:
+                case ActionName.Check:
                     _warriorClient.Check();
                     break;
             }

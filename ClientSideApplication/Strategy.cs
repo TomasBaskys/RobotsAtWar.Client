@@ -1,30 +1,60 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using ClientSideApplication.Enums;
 using ClientSideApplication.Tools;
 
 namespace ClientSideApplication
 {
     public class Strategy
     {
-        public static List<Commands> YourStrategy()
+        public static List<Command> YourStrategy()
         {
             string[] actions = ConfigSettings.ReadSetting("Action").Split(',').Select(s => s.Trim()).ToArray();
             string[] actionLevel = ConfigSettings.ReadSetting("ActionLevel").Split(',').Select(s => s.Trim()).ToArray();
-
-            List<Commands> myStrategy = new List<Commands>();
+            Strength strength = Strength.None;
+            ActionName action = ActionName.Check;
+            int time;
+            List<Command> myStrategy = new List<Command>();
 
             for (int i = 0; i < actions.Length; i++)
             {
-                var action = (WarriorBrain.Actions)Enum.Parse(typeof(WarriorBrain.Actions), actions[i]);
-                if (action == WarriorBrain.Actions.Attack)
+                
+                switch (actions[i])
                 {
-                    var strength = (WarriorBrain.Strength)Enum.Parse(typeof(WarriorBrain.Strength), actionLevel[i]);
-                    myStrategy.Add(new Commands(action, strength));
+                    case "Attack":
+                        action = ActionName.Attack;
+                        break;
+                    case "Defend":
+                        action = ActionName.Defend;
+                        break;
+                    case "Rest":
+                        action = ActionName.Rest;
+                        break;
+                    case "Check":
+                        action = ActionName.Check;
+                        break;
+                }
+                if (action == ActionName.Rest || action == ActionName.Defend)
+                {
+                    time = Int32.Parse(actionLevel[i]);
+                    myStrategy.Add(new Command(action,time));
+                }
+                else if (action == ActionName.Attack)
+                {
+                    try
+                    {
+                        strength = (Strength)Enum.Parse(typeof(Strength), actionLevel[i]);
+                        myStrategy.Add(new Command(action,strength));
+                    }
+                    catch (Exception)
+                    {
+                        Console.WriteLine("Wrong strength value in strategy");
+                    }
                 }
                 else
                 {
-                    myStrategy.Add(new Commands(action, Int32.Parse(actionLevel[i])));
+                    myStrategy.Add(new Command(action));
                 }
             }
             return myStrategy;

@@ -4,6 +4,7 @@
     {
         Weak,
         Medium,
-        Strong
+        Strong,
+        None
     }
 }
