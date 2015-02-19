@@ -103,6 +103,9 @@ namespace ClientSideApplication
 
             switch (damage)
             {
+                case -3:
+                    Logger.Info("Other player has not joined yet");
+                    break;
                 case -2:
                     Logger.Info("You were trying to attack, but you were interrupted");
                     break;
@@ -135,6 +138,8 @@ namespace ClientSideApplication
 
             if (respond == -1)
                 Logger.Info("Invalid time!");
+            if (respond == -3)
+                Logger.Info("Other user not ready!");
         }
 
         public void Rest(int time)
@@ -145,6 +150,9 @@ namespace ClientSideApplication
 
             switch (healPoints)
             {
+                case -2:
+                    Logger.Info("Other user has not joined yet!");
+                    break;
                 case -1:
                     Logger.Info("Invalid time!");
                     break;
@@ -207,12 +215,12 @@ namespace ClientSideApplication
             return responseString == "NOT WINNER";
         }
 
-        public DateTime WaitForStart()
+        public bool AreBothUsersOnline()
         {
             try
             {
                 var client = new RestClient(ConfigSettings.ReadSetting("Url"));
-                var request = new RestRequest("GetBattleStart/{RoomGuid}", Method.POST);
+                var request = new RestRequest("UsersReady/{RoomGuid}", Method.POST);
 
                 request.AddUrlSegment("RoomGuid", WarriorBrain.RoomGuid);
 
@@ -220,17 +228,16 @@ namespace ClientSideApplication
 
                 var content = response.Content;
 
-                content = content.Substring(1, content.Length - 2);
-
-                DateTime dt = Convert.ToDateTime(content);
-                return dt;
+                if(content == "false")
+                    return false;
+                return true;
 
             }
             catch (Exception)
             {
                 Logger.Info("Unable to Host game, server is unavailable");
             }
-            return new DateTime(2000, 01, 01);
+            return false;
         }
     }
 }

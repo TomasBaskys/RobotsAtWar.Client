@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
+using log4net;
 
 namespace ClientSideApplication
 {
@@ -9,6 +10,9 @@ namespace ClientSideApplication
         public enum Actions { Attack, Defend, Rest, Check }
         public enum Strength { Weak, Medium, Strong, None }
 
+        private static readonly ILog Logger = LogManager.GetLogger(typeof(WarriorClient));
+
+        private bool BothUsersOnline = false;
         private readonly WarriorClient _warriorClient;
         private int _currentActionNumber;
         private DateTime _battleTime = new DateTime(2000, 01, 01);
@@ -45,14 +49,11 @@ namespace ClientSideApplication
                     Console.WriteLine("Wrong letter, please try again.");
                 }
             }
-            while (_battleTime < DateTime.UtcNow)
+            while (!BothUsersOnline)
             {
-                _battleTime = _warriorClient.WaitForStart();
+                BothUsersOnline = _warriorClient.AreBothUsersOnline();
                 Thread.Sleep(100);
             }
-
-            if (_battleTime > DateTime.UtcNow)
-                Thread.Sleep(_battleTime - DateTime.UtcNow);
 
             Thread checkGetAttackedThread = new Thread(_warriorClient.CheckGetAttacked);
             checkGetAttackedThread.Start();
