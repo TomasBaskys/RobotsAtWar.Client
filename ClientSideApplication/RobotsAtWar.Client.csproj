@@ -53,6 +53,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Commands.cs" />
+    <Compile Include="Enums\Response.cs" />
     <Compile Include="Enums\States.cs" />
     <Compile Include="Enums\Strength.cs" />
     <Compile Include="Strategy.cs" />

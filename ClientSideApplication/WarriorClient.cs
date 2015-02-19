@@ -3,6 +3,7 @@ using System.IO;
 using System.Net;
 using System.Threading;
 using System.Web.Script.Serialization;
+using ClientSideApplication.Enums;
 using ClientSideApplication.Tools;
 using log4net;
 using RestSharp;
@@ -13,7 +14,7 @@ namespace ClientSideApplication
     {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(WarriorClient));
 
-        private static string DoAction(string action, WarriorBrain.Strength strength, int time)
+        private Response DoAction(string action, WarriorBrain.Strength strength, int time)
         {
             var client = new RestClient(ConfigSettings.ReadSetting("Url"));
             var request = new RestRequest(action + "/{RoomGUID}/{MyGUID}/{strength}", Method.POST);
@@ -31,13 +32,32 @@ namespace ClientSideApplication
 
                 var content = response.Content;
 
-                return content;
+                return StringToResponse(content);
             }
             catch (Exception)
             {
                 Logger.Info("Unable to connect to server!");
             }
-            return "0";
+            return Response.WrongData;
+        }
+
+        private Response StringToResponse(string value)
+        {
+            switch (value)
+            {
+                case "0":
+                    return Response.Success;
+                case "1":
+                    return Response.Defending;
+                case "2":
+                    return Response.Interrupted;
+                case "3":
+                    return Response.WrongData;
+                case "4":
+                    return Response.NotReady;
+            }
+
+            return Response.WrongData;
         }
 
         public string HostGame()
@@ -96,74 +116,106 @@ namespace ClientSideApplication
             }
         }
 
-        public void Attack(WarriorBrain.Strength strength)
+        public Response Attack(WarriorBrain.Strength strength)
         {
             Logger.Info("You are trying to deal " + strength + " atack!");
-            int damage = Int32.Parse(DoAction("attack", strength, 0));
+            Response attackResponse = DoAction("attack", strength, 0);
 
-            switch (damage)
+            switch (attackResponse)
             {
-                case -3:
+                case Response.NotReady:
                     Logger.Info("Other player has not joined yet");
                     break;
-                case -2:
+                case Response.Interrupted:
                     Logger.Info("You were trying to attack, but you were interrupted");
                     break;
-                case -1:
+                case Response.WrongData:
                     Logger.Info("Invalid time!");
                     break;
-                case 0:
+                case Response.Defending:
                     Logger.Info("Enemy didn`t lose any health because he was defending!");
                     break;
-                default:
-                    Logger.InfoFormat("Enemy was damaged for {0} hitpoints", damage);
+                case Response.Success:
+                    Logger.InfoFormat("I have succesfully dealt {0} attack", strength);
                     break;
             }
+            return attackResponse;
         }
 
-        public void Check()
+        public WarriorState Check()
         {
             Logger.Info("You are checking the State of your enemy");
 
-            string state = DoAction("check", WarriorBrain.Strength.None, 0);
+            var client = new RestClient(ConfigSettings.ReadSetting("Url"));
+            var request = new RestRequest("check" + "/{RoomGUID}/{MyGUID}", Method.POST);
 
-            Logger.InfoFormat("The State of your enemy is: {0}", state);
-            Logger.Info("My current life is: " + WarriorBrain.MyInfo.Life + " State is: " + WarriorBrain.MyInfo.State);
+            request.AddUrlSegment("RoomGUID", WarriorBrain.RoomGuid);
+            request.AddUrlSegment("MyGUID", ConfigSettings.ReadSetting("MyGUID"));
+            try
+            {
+                IRestResponse response = client.Execute(request);
+
+                var content = response.Content;
+
+                WarriorState enemyInfo = new JavaScriptSerializer().Deserialize<WarriorState>(content);
+                Logger.Info("My current life is: " + WarriorBrain.MyInfo.Life + " State is: " + WarriorBrain.MyInfo.State);
+                Logger.Info("Enemy current life is: " + enemyInfo.Life + " State is: " + enemyInfo.State);
+
+
+                return enemyInfo;
+
+
+            }
+            catch (Exception)
+            {
+                Logger.Info("Unable to connect to server!");
+            }
+            return null;
+
+
+
         }
 
-        public void Defend(int time)
+        public Response Defend(int time)
         {
             Logger.Info("You are defending for " + time + "s.");
 
-            int respond = Int32.Parse(DoAction("defend", WarriorBrain.Strength.None, time));
+            Response response = DoAction("defend", WarriorBrain.Strength.None, time);
 
-            if (respond == -1)
-                Logger.Info("Invalid time!");
-            if (respond == -3)
-                Logger.Info("Other user not ready!");
+            switch (response)
+            {
+                case Response.WrongData:
+                    Logger.Info("Invalid time!");
+                    break;
+                case Response.NotReady:
+                    Logger.Info("Other user not ready!");
+                    break;
+            }
+            return response;
         }
 
-        public void Rest(int time)
+        public Response Rest(int time)
         {
             Logger.Info("You are resting for " + time + "s");
 
-            int healPoints = Int32.Parse(DoAction("rest", WarriorBrain.Strength.None, time));
+            Response response = DoAction("rest", WarriorBrain.Strength.None, time);
 
-            switch (healPoints)
+            switch (response)
             {
-                case -2:
+                case Response.NotReady:
                     Logger.Info("Other user has not joined yet!");
                     break;
-                case -1:
+                case Response.WrongData:
                     Logger.Info("Invalid time!");
                     break;
-                case 0:
+                case Response.Interrupted:
                     Logger.Info("You were trying to rest, but you were interrupted");
                     break;
-                default:
-                    Logger.Info("You have been healed by " + healPoints + " points");
+                case Response.Success:
+                    Logger.Info("You have successfully healed");
                     break;
             }
+            return response;
         }
 
         public static bool IsBattleOver()
