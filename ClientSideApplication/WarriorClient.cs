@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Net;
 using System.Threading;
+using System.Web.Script.Serialization;
 using ClientSideApplication.Tools;
 using log4net;
 using RestSharp;
@@ -98,7 +99,6 @@ namespace ClientSideApplication
         public void Attack(WarriorBrain.Strength strength)
         {
             Logger.Info("You are trying to deal " + strength + " atack!");
-            int a;
             int damage = Int32.Parse(DoAction("attack", strength, 0));
 
             switch (damage)
@@ -128,6 +128,7 @@ namespace ClientSideApplication
             string state = DoAction("check", WarriorBrain.Strength.None, 0);
 
             Logger.InfoFormat("The State of your enemy is: {0}", state);
+            Logger.Info("My current life is: " + WarriorBrain.MyInfo.Life + " State is: " + WarriorBrain.MyInfo.State);
         }
 
         public void Defend(int time)
@@ -177,25 +178,30 @@ namespace ClientSideApplication
             return responseString.Equals("true");
         }
 
-        public void CheckGetAttacked()
+        public void GetMyInfo()
         {
             while (true)
             {
-                var request = (HttpWebRequest)WebRequest.Create(ConfigSettings.ReadSetting("Url") + "GetAttacked/" + WarriorBrain.RoomGuid + "/" + ConfigSettings.ReadSetting("MyGUID"));
+                var client = new RestClient(ConfigSettings.ReadSetting("Url"));
+                var request = new RestRequest("MyStats/{RoomGuid}/{MyGUID}", Method.GET);
 
-                var response = (HttpWebResponse)request.GetResponse();
-
-                // ReSharper disable once AssignNullToNotNullAttribute
-                var responseString = new StreamReader(response.GetResponseStream()).ReadToEnd();
-
-                var damage = Int32.Parse(responseString);
-
-                if (damage != 0)
+                request.AddUrlSegment("RoomGuid", WarriorBrain.RoomGuid);
+                request.AddUrlSegment("MyGUID", ConfigSettings.ReadSetting("MyGUID"));
+                try
                 {
-                    Logger.Info("You were damaged for " + damage + " hit points.");
-                }
+                    IRestResponse response = client.Execute(request);
 
-                Thread.Sleep(25);
+                    var content = response.Content;
+
+                    WarriorBrain.MyInfo = new JavaScriptSerializer().Deserialize<WarriorState>(content);
+
+                    Thread.Sleep(25);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                }
+                
             }
             // ReSharper disable once FunctionNeverReturns
         }

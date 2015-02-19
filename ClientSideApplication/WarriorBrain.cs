@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net.NetworkInformation;
 using System.Threading;
+using ClientSideApplication.Enums;
 using log4net;
 
 namespace ClientSideApplication
@@ -10,16 +12,14 @@ namespace ClientSideApplication
         public enum Actions { Attack, Defend, Rest, Check }
         public enum Strength { Weak, Medium, Strong, None }
 
-        private static readonly ILog Logger = LogManager.GetLogger(typeof(WarriorClient));
 
-        private bool BothUsersOnline = false;
+        private bool _bothUsersOnline = false;
         private readonly WarriorClient _warriorClient;
         private int _currentActionNumber;
-        private DateTime _battleTime = new DateTime(2000, 01, 01);
         private readonly List<Commands> _strategy;
         public static string RoomGuid;
         private bool _ihaveLost;
-
+        public static WarriorState MyInfo = new WarriorState() { Life = 10, State = States.DoingNothing };
         public WarriorBrain(List<Commands> strategy)
         {
             _warriorClient = new WarriorClient();
@@ -49,13 +49,13 @@ namespace ClientSideApplication
                     Console.WriteLine("Wrong letter, please try again.");
                 }
             }
-            while (!BothUsersOnline)
+            while (!_bothUsersOnline)
             {
-                BothUsersOnline = _warriorClient.AreBothUsersOnline();
+                _bothUsersOnline = _warriorClient.AreBothUsersOnline();
                 Thread.Sleep(100);
             }
 
-            Thread checkGetAttackedThread = new Thread(_warriorClient.CheckGetAttacked);
+            Thread checkGetAttackedThread = new Thread(_warriorClient.GetMyInfo);
             checkGetAttackedThread.Start();
 
             Fight();
