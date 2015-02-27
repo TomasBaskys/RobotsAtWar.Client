@@ -5,7 +5,7 @@ namespace ClientSideApplication
 {
     class Program
     {
-        static void Main(string[] args)
+        static void Main()
         {
             XmlConfigurator.Configure(new FileInfo("..\\..\\App.config"));
 

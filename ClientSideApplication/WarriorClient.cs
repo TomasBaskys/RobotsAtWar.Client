@@ -161,19 +161,13 @@ namespace ClientSideApplication
                 Logger.Info("My current life is: " + WarriorBrain.MyInfo.Life + " State is: " + WarriorBrain.MyInfo.State);
                 Logger.Info("Enemy current life is: " + enemyInfo.Life + " State is: " + enemyInfo.State);
 
-
                 return enemyInfo;
-
-
             }
             catch (Exception)
             {
                 Logger.Info("Unable to connect to server!");
             }
             return null;
-
-
-
         }
 
         public Response Defend(int time)

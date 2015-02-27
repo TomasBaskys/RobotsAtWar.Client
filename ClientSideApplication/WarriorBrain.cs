@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Net.NetworkInformation;
 using System.Threading;
 using ClientSideApplication.Enums;
-using log4net;
 
 namespace ClientSideApplication
 {
