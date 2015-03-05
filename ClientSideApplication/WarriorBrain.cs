@@ -25,18 +25,26 @@ namespace ClientSideApplication
         {
             string action = "";
             Console.WriteLine("Do you want to join a game or host it?\n \n'J' to Join, 'H' to Host ");
-            while (action != null && (action.ToLower() != "j" && action.ToLower() != "h"))
+            while (true)
             {
                 action = Console.ReadLine();
                 if (action != null && action.ToLower() == "h")
                 {
                     RoomGuid = _warriorClient.HostGame();
+                    break;
                 }
-                else if (action != null && action.ToLower() == "j")
+                if (action != null && action.ToLower() == "j")
                 {
                     Console.WriteLine("Please insert guid of WarRoom that you wish to join");
-                    RoomGuid = Guid.Parse(Console.ReadLine());
-                    _warriorClient.JoinGame(RoomGuid);
+                    string guid = Console.ReadLine();
+
+                    if (Guid.TryParse(guid, out RoomGuid))
+                    {
+                        _warriorClient.JoinGame(RoomGuid);
+                        break;
+                    }
+                    Console.WriteLine("Incorrect room guid");
+                    
                 }
                 else
                 {

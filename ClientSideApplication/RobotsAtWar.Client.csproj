@@ -73,7 +73,6 @@
     <Compile Include="Tools\ConfigSettings.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Tools\ExceptionHadler.cs" />
     <Compile Include="WarriorBrain.cs" />
     <Compile Include="WarriorClient.cs" />
     <Compile Include="WarriorState.cs" />

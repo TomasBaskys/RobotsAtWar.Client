@@ -70,7 +70,7 @@ namespace ClientSideApplication
             return Response.WrongData;
         }
 
-        public string HostGame()
+        public Guid HostGame()
         {
             while (true)
             {
@@ -83,7 +83,8 @@ namespace ClientSideApplication
                     //content = content.Substring(1, content.Length - 2);
 
                     Logger.Info("Game room Guid is:\n" + content);
-                    return content;
+
+                    return Guid.Parse(content);
                 }
                 catch (Exception)
                 {
@@ -92,7 +93,7 @@ namespace ClientSideApplication
             }
         }
 
-        public void JoinGame(string roomGuid)
+        public void JoinGame(Guid roomGuid)
         {
             while (true)
             {
