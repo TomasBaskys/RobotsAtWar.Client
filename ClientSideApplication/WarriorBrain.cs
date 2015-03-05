@@ -16,12 +16,12 @@ namespace ClientSideApplication
         public static string RoomGuid;
         private bool _ihaveLost;
         public static WarriorState MyInfo = new WarriorState() { Life = 10, State = States.DoingNothing };
+
         public WarriorBrain(List<Command> strategy)
         {
             _warriorClient = new WarriorClient();
             _strategy = strategy;
         }
-
 
         public void Start()
         {
@@ -57,14 +57,13 @@ namespace ClientSideApplication
             Fight();
         }
 
-
         private void Fight()
         {
             while (true)
             {
-                if (WarriorClient.IsBattleOver())
+                if (_warriorClient.IsBattleOver())
                 {
-                    _ihaveLost = WarriorClient.CheckForWinner();
+                    _ihaveLost = _warriorClient.CheckForWinner();
                     break;
                 }
                 ExecuteNextCommand();

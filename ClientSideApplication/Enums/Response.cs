@@ -3,9 +3,11 @@
     public enum Response
     {
         Success,
-        Defending,
         Interrupted,
         WrongData,
-        NotReady
+        BattleNotStarted,
+        DefendingHeavyShield,
+        DefendingNormalShield,
+        DefendingLightShield
     }
 }
