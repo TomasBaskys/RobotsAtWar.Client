@@ -40,7 +40,7 @@ namespace ClientSideApplication
             {
                 return;
             }
-            this.Action = action;
+            Action = action;
         }
     }
 }

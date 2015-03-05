@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Net.NetworkInformation;
 using System.Threading;
 using ClientSideApplication.Enums;
-using log4net;
 
 namespace ClientSideApplication
 {
@@ -13,7 +11,7 @@ namespace ClientSideApplication
         private readonly WarriorClient _warriorClient;
         private int _currentActionNumber;
         private readonly List<Command> _strategy;
-        public static string RoomGuid;
+        public static Guid RoomGuid;
         private bool _ihaveLost;
         public static WarriorState MyInfo = new WarriorState() { Life = 10, State = States.DoingNothing };
 
@@ -37,7 +35,7 @@ namespace ClientSideApplication
                 else if (action != null && action.ToLower() == "j")
                 {
                     Console.WriteLine("Please insert guid of WarRoom that you wish to join");
-                    RoomGuid = Console.ReadLine();
+                    RoomGuid = Guid.Parse(Console.ReadLine());
                     _warriorClient.JoinGame(RoomGuid);
                 }
                 else
