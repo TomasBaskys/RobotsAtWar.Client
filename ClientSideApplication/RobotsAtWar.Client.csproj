@@ -47,13 +47,12 @@
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Net.Http" />
-    <Reference Include="System.Net.Http.Formatting">
+    <Reference Include="System.Net.Http.Formatting, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Microsoft.AspNet.WebApi.Client.5.2.3\lib\net45\System.Net.Http.Formatting.dll</HintPath>
-      <Private>True</Private>
     </Reference>
     <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Web.Extensions.Design" />
-    <Reference Include="System.Web.Http, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -66,7 +65,6 @@
     <Compile Include="Enums\AttackOutcome.cs" />
     <Compile Include="Enums\DefenseOutcome.cs" />
     <Compile Include="Enums\JoinOutcome.cs" />
-    <Compile Include="Enums\Response.cs" />
     <Compile Include="Enums\RestOutcome.cs" />
     <Compile Include="Enums\States.cs" />
     <Compile Include="Enums\Strength.cs" />

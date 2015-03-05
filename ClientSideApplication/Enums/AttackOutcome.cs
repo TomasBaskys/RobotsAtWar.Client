@@ -5,7 +5,8 @@
          Success,
          Interrupted,
          WrongData,
-         Blocked,
+         Defended,
+         Reflected,
          BattleNotStarted
      }
 }

@@ -11,7 +11,7 @@ namespace ClientSideApplication
     public class WarriorClient
     {
         private readonly HttpClient _client;
-        private readonly string _myGuid;
+        private readonly Guid _myGuid;
 
         public WarriorClient()
         {
@@ -20,7 +20,10 @@ namespace ClientSideApplication
             _client.DefaultRequestHeaders.Accept.Clear();
             _client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
-            _myGuid = ConfigSettings.ReadSetting("MyGUID");
+           if(!Guid.TryParse(ConfigSettings.ReadSetting("MyGUID"), out _myGuid))
+           {
+               _myGuid = Guid.NewGuid();
+           }
         }
 
 
@@ -116,9 +119,10 @@ namespace ClientSideApplication
 
                     return Guid.Parse(content);
                 }
-                catch (Exception)
+                catch (Exception e )
                 {
                     WarriorLogger.UnableToConnect();
+                    Console.WriteLine(e);
                 }
             }
         }

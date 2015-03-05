@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using ClientSideApplication.Enums;
 using log4net;
 
@@ -10,7 +11,7 @@ namespace ClientSideApplication.Tools
 
         public static void GameHost(Guid roomGuid)
         {
-            Logger.Info("You are hosting a game room, it's guid is:" + roomGuid);
+            Logger.Info("You are hosting a game room, it's guid is:\n" + roomGuid);
         }
 
         public static void JoinGame(JoinRoomOutcome outcome)
@@ -51,14 +52,16 @@ namespace ClientSideApplication.Tools
                 case AttackOutcome.WrongData:
                     WrongAttackData();
                     break;
-                case AttackOutcome.Blocked:
-                    Logger.Info("Your was blocked with a shield");
+                case AttackOutcome.Reflected:
+                    Logger.Info("Your " + strength + " attack was reflected with a shield");
+                    break;
+                case AttackOutcome.Defended:
+                    Logger.Info("Your " + strength + " attack was blocked with shield");
                     break;
                 case AttackOutcome.BattleNotStarted:
                     BattleNotStarted();
                     break;
             }
-            Logger.Info("Your " + strength + " attack was " + outcome);
         }
         public static void DefenceLogging(DefenseOutcome outcome)
         {
@@ -126,6 +129,7 @@ namespace ClientSideApplication.Tools
         public static void UnableToConnect()
         {
             Logger.Error("Unable to connect to server!");
+            Thread.Sleep(1000);
         }
 
         public static void CountDown(int number)
