@@ -51,7 +51,7 @@ namespace ClientSideApplication
         public WarriorState()
         {
             State = States.DoingNothing;
-            Life = 100;
+            Life = 10;
         }
 
     }

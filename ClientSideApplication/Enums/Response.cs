@@ -6,6 +6,9 @@
         Defending,
         Interrupted,
         WrongData,
-        NotReady
+        BattleNotStarted,
+        DefendingHeavyShield,
+        DefendingNormalShield,
+        DefendingLightShield
     }
 }

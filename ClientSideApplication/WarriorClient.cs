@@ -14,6 +14,8 @@ namespace ClientSideApplication
     {
         private static readonly ILog Logger = LogManager.GetLogger(typeof(WarriorClient));
 
+        private static Guid _myGuid;
+
         private Response DoAction(string action, Strength strength, int time)
         {
             var client = new RestClient(ConfigSettings.ReadSetting("Url"));
@@ -23,8 +25,8 @@ namespace ClientSideApplication
             if (strength.Equals(Strength.None)) info = time.ToString();
             else info = strength.ToString();
 
-            request.AddUrlSegment("RoomGUID", WarriorBrain.RoomGuid);
-            request.AddUrlSegment("MyGUID", ConfigSettings.ReadSetting("MyGUID"));
+            request.AddUrlSegment("RoomGUID", WarriorBrain.RoomGuid.ToString());
+            request.AddUrlSegment("MyGUID", _myGuid.ToString());
             request.AddUrlSegment("strength", info);
             try
             {
@@ -54,22 +56,34 @@ namespace ClientSideApplication
                 case "3":
                     return Response.WrongData;
                 case "4":
-                    return Response.NotReady;
+                    return Response.BattleNotStarted;
             }
 
             return Response.WrongData;
         }
 
-        public string HostGame()
+        public Guid HostGame()
         {
             while (true)
             {
                 try
                 {
+                    Guid tempGuid;
+
                     var client = new RestClient(ConfigSettings.ReadSetting("Url"));
                     var request = new RestRequest("HostGame/{MyGUID}", Method.POST);
 
-                    request.AddUrlSegment("MyGUID", ConfigSettings.ReadSetting("MyGUID"));
+                    if (Guid.TryParse(ConfigSettings.ReadSetting("MyGUID"), out tempGuid))
+                    {
+                        _myGuid = Guid.Parse(ConfigSettings.ReadSetting("MyGUID"));
+                    }
+                    else
+                    {
+                        _myGuid = Guid.NewGuid();
+                        Logger.Info("Your Guid is incorrect, so this time you are playing as Guest");
+                    }
+
+                    request.AddUrlSegment("MyGUID", _myGuid.ToString());
 
                     IRestResponse response = client.Execute(request);
 
@@ -77,7 +91,7 @@ namespace ClientSideApplication
 
                     content = content.Substring(1, content.Length - 2);
                     Logger.Info("Game room Guid is:\n" + content);
-                    return content;
+                    return Guid.TryParse(content, out tempGuid)? Guid.Parse(content) : new Guid();
 
                 }
                 catch (Exception)
@@ -87,17 +101,29 @@ namespace ClientSideApplication
             }
         }
 
-        public void JoinGame(string roomGuid)
+        public void JoinGame(Guid roomGuid)
         {
             while (true)
             {
                 try
                 {
+                    Guid tempGuid;
+
                     var client = new RestClient(ConfigSettings.ReadSetting("Url"));
                     var request = new RestRequest("JoinGame/{RoomGUID}/{MyGUID}", Method.POST);
 
-                    request.AddUrlSegment("MyGUID", ConfigSettings.ReadSetting("MyGUID"));
-                    request.AddUrlSegment("RoomGUID", roomGuid);
+                    if (Guid.TryParse(ConfigSettings.ReadSetting("MyGUID"), out tempGuid))
+                    {
+                        _myGuid = Guid.Parse(ConfigSettings.ReadSetting("MyGUID"));
+                    }
+                    else
+                    {
+                        _myGuid = Guid.NewGuid();
+                        Logger.Info("Your Guid is incorrect, so this time you are playing as Guest");
+                    }
+
+                    request.AddUrlSegment("MyGUID", _myGuid.ToString());
+                    request.AddUrlSegment("RoomGUID", roomGuid.ToString());
 
                     IRestResponse response = client.Execute(request);
 
@@ -123,7 +149,7 @@ namespace ClientSideApplication
 
             switch (attackResponse)
             {
-                case Response.NotReady:
+                case Response.BattleNotStarted:
                     Logger.Info("Other player has not joined yet");
                     break;
                 case Response.Interrupted:
@@ -149,8 +175,8 @@ namespace ClientSideApplication
             var client = new RestClient(ConfigSettings.ReadSetting("Url"));
             var request = new RestRequest("check" + "/{RoomGUID}/{MyGUID}", Method.POST);
 
-            request.AddUrlSegment("RoomGUID", WarriorBrain.RoomGuid);
-            request.AddUrlSegment("MyGUID", ConfigSettings.ReadSetting("MyGUID"));
+            request.AddUrlSegment("RoomGUID", WarriorBrain.RoomGuid.ToString());
+            request.AddUrlSegment("MyGUID", _myGuid.ToString());
             try
             {
                 IRestResponse response = client.Execute(request);
@@ -181,7 +207,7 @@ namespace ClientSideApplication
                 case Response.WrongData:
                     Logger.Info("Invalid time!");
                     break;
-                case Response.NotReady:
+                case Response.BattleNotStarted:
                     Logger.Info("Other user not ready!");
                     break;
             }
@@ -196,7 +222,7 @@ namespace ClientSideApplication
 
             switch (response)
             {
-                case Response.NotReady:
+                case Response.BattleNotStarted:
                     Logger.Info("Other user has not joined yet!");
                     break;
                 case Response.WrongData:
@@ -231,8 +257,8 @@ namespace ClientSideApplication
                 var client = new RestClient(ConfigSettings.ReadSetting("Url"));
                 var request = new RestRequest("MyStats/{RoomGuid}/{MyGUID}", Method.GET);
 
-                request.AddUrlSegment("RoomGuid", WarriorBrain.RoomGuid);
-                request.AddUrlSegment("MyGUID", ConfigSettings.ReadSetting("MyGUID"));
+                request.AddUrlSegment("RoomGuid", WarriorBrain.RoomGuid.ToString());
+                request.AddUrlSegment("MyGUID", _myGuid.ToString());
                 try
                 {
                     IRestResponse response = client.Execute(request);
@@ -254,8 +280,8 @@ namespace ClientSideApplication
 
         public static bool CheckForWinner()
         {
-            var request = (HttpWebRequest)WebRequest.Create(ConfigSettings.ReadSetting("Url") + "Winner/" + WarriorBrain.RoomGuid + "/" + ConfigSettings.ReadSetting("MyGUID"));
-
+            var request = (HttpWebRequest)WebRequest.Create(ConfigSettings.ReadSetting("Url") + "Winner/" + WarriorBrain.RoomGuid + "/" + _myGuid);
+            
             var response = (HttpWebResponse)request.GetResponse();
 
             // ReSharper disable once AssignNullToNotNullAttribute
@@ -274,7 +300,7 @@ namespace ClientSideApplication
                 var client = new RestClient(ConfigSettings.ReadSetting("Url"));
                 var request = new RestRequest("UsersReady/{RoomGuid}", Method.POST);
 
-                request.AddUrlSegment("RoomGuid", WarriorBrain.RoomGuid);
+                request.AddUrlSegment("RoomGuid", WarriorBrain.RoomGuid.ToString());
 
                 IRestResponse response = client.Execute(request);
 
