@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Threading;
 using ClientSideApplication.Enums;
+using ClientSideApplication.Tools;
+using log4net.Repository.Hierarchy;
 
 namespace ClientSideApplication
 {
@@ -23,7 +25,7 @@ namespace ClientSideApplication
 
         public void Start()
         {
-            string action = "";
+            string action;
             Console.WriteLine("Do you want to join a game or host it?\n \n'J' to Join, 'H' to Host ");
             while (true)
             {
@@ -31,24 +33,26 @@ namespace ClientSideApplication
                 if (action != null && action.ToLower() == "h")
                 {
                     RoomGuid = _warriorClient.HostGame();
+                    WarriorLogger.GameHost(RoomGuid);
                     break;
                 }
                 if (action != null && action.ToLower() == "j")
                 {
-                    Console.WriteLine("Please insert guid of WarRoom that you wish to join");
+                    
                     string guid = Console.ReadLine();
 
                     if (Guid.TryParse(guid, out RoomGuid))
                     {
-                        _warriorClient.JoinGame(RoomGuid);
+                        JoinRoomOutcome joinOutcome = _warriorClient.JoinGame(RoomGuid);
+                        WarriorLogger.JoinGame(joinOutcome);
                         break;
                     }
-                    Console.WriteLine("Incorrect room guid");
+                    WarriorLogger.WrongRoomGuid();
                     
                 }
                 else
                 {
-                    Console.WriteLine("Wrong letter, please try again.");
+                    WarriorLogger.WrongLetter();
                 }
             }
             while (!_bothUsersOnline)
@@ -76,10 +80,10 @@ namespace ClientSideApplication
             }
             if (_ihaveLost)
             {
-                Console.WriteLine("I have lost the battle...\nConsole closing in...");
+                WarriorLogger.BattleLost();
                 for (int i = 5; i > 0; i--)
                 {
-                    Console.WriteLine(i);
+                    WarriorLogger.CountDown(i);
                     Thread.Sleep(1000);
                 }
                 Environment.Exit(0);
@@ -97,16 +101,20 @@ namespace ClientSideApplication
             switch (command.Action)
             {
                 case ActionName.Attack:
-                    _warriorClient.Attack(command.Strength);
+                    AttackOutcome attackOutcome = _warriorClient.Attack(command.Strength);
+                    WarriorLogger.AttackLogging(attackOutcome, command.Strength);
                     break;
                 case ActionName.Defend:
-                    _warriorClient.Defend(command.Time);
+                    DefenseOutcome defenseOutcome = _warriorClient.Defend(command.Time);
+                    WarriorLogger.DefenceLogging(defenseOutcome);
                     break;
                 case ActionName.Rest:
-                    _warriorClient.Rest(command.Time);
+                    RestOutcome restOutcome = _warriorClient.Rest(command.Time);
+                    WarriorLogger.RestLogging(restOutcome);
                     break;
                 case ActionName.Check:
-                    _warriorClient.Check();
+                    WarriorState warriorState = _warriorClient.Check();
+                    WarriorLogger.CheckLogging(warriorState);
                     break;
             }
         }

@@ -3,7 +3,6 @@
     public enum DefenseOutcome
     {
         Success,
-        Interrupted,
         WrongData,
         BattleNotStarted
     }
